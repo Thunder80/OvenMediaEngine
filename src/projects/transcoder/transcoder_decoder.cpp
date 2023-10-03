@@ -144,7 +144,16 @@ std::shared_ptr<TranscodeDecoder> TranscodeDecoder::Create(int32_t decoder_id, c
 				goto done;
 			}
 			break;
-			
+
+		case cmn::MediaCodecId::Multiopus:
+			decoder = std::make_shared<DecoderOPUS>(info);
+			if (decoder != nullptr && decoder->Configure(track) == true)
+			{
+				track->SetCodecLibraryId(cmn::MediaCodecLibraryId::DEFAULT);
+				goto done;
+			}
+			break;
+
 		default:
 			OV_ASSERT(false, "Not supported codec: %d", track->GetCodecId());
 			break;
@@ -233,8 +242,6 @@ bool TranscodeDecoder::Configure(std::shared_ptr<MediaTrack> track)
 		name);
 	_input_buffer.SetUrn(urn);
 	_input_buffer.SetThreshold(MAX_QUEUE_SIZE);
-
-
 
 	return (_track != nullptr);
 }

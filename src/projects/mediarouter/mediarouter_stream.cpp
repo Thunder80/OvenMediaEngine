@@ -32,14 +32,12 @@
 #include <modules/bitstream/aac/aac_adts.h>
 #include <modules/bitstream/aac/aac_converter.h>
 #include <modules/bitstream/aac/audio_specific_config.h>
-
-#include <modules/bitstream/nalu/nal_stream_converter.h>
 #include <modules/bitstream/h264/h264_decoder_configuration_record.h>
 #include <modules/bitstream/h264/h264_nal_unit_types.h>
 #include <modules/bitstream/h264/h264_parser.h>
-
 #include <modules/bitstream/h265/h265_decoder_configuration_record.h>
 #include <modules/bitstream/h265/h265_parser.h>
+#include <modules/bitstream/nalu/nal_stream_converter.h>
 #include <modules/bitstream/nalu/nal_unit_fragment_header.h>
 #include <modules/bitstream/opus/opus.h>
 #include <modules/bitstream/vp8/vp8.h>
@@ -149,10 +147,10 @@ bool MediaRouteStream::ProcessH264AVCCStream(std::shared_ptr<MediaTrack> &media_
 		media_track->SetHeight(avc_config->GetHeight());
 
 		media_track->SetDecoderConfigurationRecord(avc_config);
-		
+
 		return false;
 	}
-	
+
 	// Convert to AnnexB and Insert SPS/PPS if there are no SPS/PPS nal units.
 	else if (media_packet->GetPacketType() == cmn::PacketType::NALU)
 	{
@@ -219,11 +217,6 @@ bool MediaRouteStream::ProcessH264AVCCStream(std::shared_ptr<MediaTrack> &media_
 				{
 					// logtd("[PPS] %s ", ov::Base64::Encode(nalu).CStr());
 					has_pps = true;
-				}
-				else if (nal_header.GetNalUnitType() == H264NalUnitType::FillerData)
-				{
-					// no need to maintain filler data
-					continue;
 				}
 			}
 
@@ -309,7 +302,7 @@ bool MediaRouteStream::ProcessH264AnnexBStream(std::shared_ptr<MediaTrack> &medi
 		if (nal_header.GetNalUnitType() == H264NalUnitType::Sps)
 		{
 			has_sps = true;
-			
+
 			if (sps_nalu == nullptr)
 			{
 				sps_nalu = std::make_shared<ov::Data>(bitstream + offset, offset_length);
@@ -328,10 +321,6 @@ bool MediaRouteStream::ProcessH264AnnexBStream(std::shared_ptr<MediaTrack> &medi
 		{
 			has_idr = true;
 			media_packet->SetFlag(MediaPacketFlag::Key);
-		}
-		else if (nal_header.GetNalUnitType() == H264NalUnitType::FillerData)
-		{
-			//TODO(Getroot): It is better to remove filler data.
 		}
 
 		// Last NalU
@@ -451,7 +440,7 @@ bool MediaRouteStream::ProcessAACRawStream(std::shared_ptr<MediaTrack> &media_tr
 
 			media_track->SetSampleRate(audio_config->SamplerateNum());
 			media_track->GetChannel().SetLayout(audio_config->Channel() == 1 ? AudioChannel::Layout::LayoutMono : AudioChannel::Layout::LayoutStereo);
-			
+
 			media_track->SetDecoderConfigurationRecord(audio_config);
 		}
 
@@ -534,7 +523,7 @@ bool MediaRouteStream::ProcessH265AnnexBStream(std::shared_ptr<MediaTrack> &medi
 
 	auto bitstream = media_packet->GetData()->GetDataAs<uint8_t>();
 	auto bitstream_length = media_packet->GetData()->GetLength();
-	
+
 	size_t offset = 0, offset_length = 0;
 	while (offset < bitstream_length)
 	{
@@ -667,13 +656,21 @@ bool MediaRouteStream::ProcessOPUSStream(std::shared_ptr<MediaTrack> &media_trac
 
 	// The opus has a fixed samplerate of 48000
 	media_track->SetSampleRate(48000);
-	media_track->GetChannel().SetLayout((parser.GetStereoFlag() == 0) ? (AudioChannel::Layout::LayoutMono) : (AudioChannel::Layout::LayoutStereo));
+	if (parser.GetStereoFlag())
+	{
+		logtlo("Set media track to layout stereo");
+		media_track->GetChannel().SetLayout(AudioChannel::Layout::Layout5Point1);
+	}
+	else
+	{
+		media_track->GetChannel().SetLayout(AudioChannel::Layout::Layout5Point1);
+	}
 
 	return true;
 }
 
 // H264 : AVCC -> AnnexB, Add SPS/PPS in front of IDR frame
-// H265 : 
+// H265 :
 // AAC : Raw -> ADTS
 bool MediaRouteStream::NormalizeMediaPacket(std::shared_ptr<MediaTrack> &media_track, std::shared_ptr<MediaPacket> &media_packet)
 {
@@ -706,15 +703,14 @@ bool MediaRouteStream::NormalizeMediaPacket(std::shared_ptr<MediaTrack> &media_t
 			result = true;
 			break;
 		case cmn::BitstreamFormat::JPEG:
-		case cmn::BitstreamFormat::PNG:
-		{
-			if (GetInoutType()  == MediaRouterStreamType::OUTBOUND)
+		case cmn::BitstreamFormat::PNG: {
+			if (GetInoutType() == MediaRouterStreamType::OUTBOUND)
 			{
 				result = true;
 			}
 			break;
 		}
-		
+
 		case cmn::BitstreamFormat::AAC_LATM:
 		case cmn::BitstreamFormat::Unknown:
 		default:
@@ -810,7 +806,7 @@ void MediaRouteStream::UpdateStatistics(std::shared_ptr<MediaTrack> &media_track
 		for (const auto &[track_id, track] : _stream->GetTracks())
 		{
 			int64_t rescaled_last_pts = (int64_t)((double)(_stat_recv_pkt_lpts[track_id] * 1000) * track->GetTimeBase().GetExpr());
-			
+
 			// Time difference in pts values relative to uptime
 			int64_t last_delay = uptime - rescaled_last_pts;
 
@@ -827,12 +823,12 @@ void MediaRouteStream::UpdateStatistics(std::shared_ptr<MediaTrack> &media_track
 										ov::Converter::ToSiString(track->GetTotalFrameBytes(), 1).CStr(),
 										ov::Converter::BitToString(track->GetBitrateByMeasured()).CStr(), ov::Converter::BitToString(track->GetBitrateByConfig()).CStr());
 
-			if(track->GetMediaType() == MediaType::Data)
+			if (track->GetMediaType() == MediaType::Data)
 			{
 				continue;
 			}
 
-			if(track->GetMediaType() == MediaType::Video)
+			if (track->GetMediaType() == MediaType::Video)
 			{
 				stat_track_str.AppendFormat(", fps: %.2f", track->GetFrameRate());
 			}
@@ -849,7 +845,7 @@ void MediaRouteStream::UpdateStatistics(std::shared_ptr<MediaTrack> &media_track
 			}
 
 			min_pts = std::min(min_pts, rescaled_last_pts);
-			max_pts = std::max(max_pts, rescaled_last_pts);										
+			max_pts = std::max(max_pts, rescaled_last_pts);
 		}
 
 		ov::String stat_stream_str = "";
@@ -1001,9 +997,9 @@ std::shared_ptr<MediaPacket> MediaRouteStream::Pop()
 	//	- 3) and then, the current packet stash.
 	std::shared_ptr<MediaPacket> pop_media_packet = nullptr;
 
-	if ( (GetInoutType() == MediaRouterStreamType::OUTBOUND) && 
+	if ((GetInoutType() == MediaRouterStreamType::OUTBOUND) &&
 		// The packet duration recalculation applies only to video and audio types.
-		 (media_packet->GetMediaType() == MediaType::Video || media_packet->GetMediaType() == MediaType::Audio) )
+		(media_packet->GetMediaType() == MediaType::Video || media_packet->GetMediaType() == MediaType::Audio))
 	{
 		auto it = _media_packet_stash.find(media_packet->GetTrackId());
 		if (it == _media_packet_stash.end())
@@ -1041,7 +1037,7 @@ std::shared_ptr<MediaPacket> MediaRouteStream::Pop()
 		pop_media_packet = std::move(media_packet);
 
 		// The packet duration of data type is always 0.
-		if(pop_media_packet->GetMediaType() == MediaType::Data)
+		if (pop_media_packet->GetMediaType() == MediaType::Data)
 		{
 			pop_media_packet->SetDuration(0);
 		}
@@ -1061,7 +1057,7 @@ std::shared_ptr<MediaPacket> MediaRouteStream::Pop()
 
 		return nullptr;
 	}
-	
+
 	// Convert bitstream format and normalize (e.g. Add SPS/PPS to head of H264 IDR frame)
 	if (NormalizeMediaPacket(media_track, pop_media_packet) == false)
 	{
@@ -1072,8 +1068,8 @@ std::shared_ptr<MediaPacket> MediaRouteStream::Pop()
 		pop_media_packet->GetDuration() < 0)
 	{
 		logtw("[%s/%s] found invalid duration of packet. We need to find the cause of the incorrect Duration.", _stream->GetApplicationName(), _stream->GetName().CStr());
-				DumpPacket(pop_media_packet, false);
-				return nullptr;
+		DumpPacket(pop_media_packet, false);
+		return nullptr;
 	}
 
 	media_track->OnFrameAdded(pop_media_packet);

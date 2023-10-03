@@ -127,6 +127,13 @@ namespace pvd
 					audio_track->SetOriginBitstream(cmn::BitstreamFormat::OPUS_RTP_RFC_7587);
 					depacketizer_type = RtpDepacketizingManager::SupportedDepacketizerType::OPUS;
 				}
+				else if (codec == PayloadAttr::SupportCodec::MULTIOPUS)
+				{
+					logtlo("Webrtc stream codec");
+					audio_track->SetCodecId(cmn::MediaCodecId::Multiopus);
+					audio_track->SetOriginBitstream(cmn::BitstreamFormat::OPUS);
+					depacketizer_type = RtpDepacketizingManager::SupportedDepacketizerType::OPUS;
+				}
 				else if (codec == PayloadAttr::SupportCodec::MPEG4_GENERIC)
 				{
 					audio_track->SetCodecId(cmn::MediaCodecId::Aac);
@@ -148,8 +155,18 @@ namespace pvd
 				{
 					audio_track->GetChannel().SetLayout(cmn::AudioChannel::Layout::LayoutMono);
 				}
+				else if (channels == 2)
+				{
+					audio_track->GetChannel().SetLayout(cmn::AudioChannel::Layout::LayoutStereo);
+				}
+				else if (channels == 6)
+				{
+					logtlo("set audio track to 5.1");
+					audio_track->GetChannel().SetLayout(cmn::AudioChannel::Layout::Layout5Point1);
+				}
 				else
 				{
+					logtw("Unspported number of channels %d, setting audio track as stereo", channels);
 					audio_track->GetChannel().SetLayout(cmn::AudioChannel::Layout::LayoutStereo);
 				}
 
@@ -391,6 +408,11 @@ namespace pvd
 				packet_type = cmn::PacketType::RAW;
 				break;
 
+			case cmn::MediaCodecId::Multiopus:
+				bitstream_format = cmn::BitstreamFormat::OPUS;
+				packet_type = cmn::PacketType::RAW;
+				break;
+
 			case cmn::MediaCodecId::Vp8:
 				bitstream_format = cmn::BitstreamFormat::VP8;
 				packet_type = cmn::PacketType::RAW;
@@ -427,14 +449,14 @@ namespace pvd
 		// This may not work since almost WebRTC browser sends SRS/PPS in-band
 		if (_sent_sequence_header == false && track->GetCodecId() == cmn::MediaCodecId::H264 && _h264_extradata_nalu != nullptr)
 		{
-			auto media_packet = std::make_shared<MediaPacket>(GetMsid(),	
-																track->GetMediaType(), 
-																track->GetId(), 
-																_h264_extradata_nalu,
-																adjusted_timestamp, 
-																adjusted_timestamp, 
-																cmn::BitstreamFormat::H264_ANNEXB, 
-																cmn::PacketType::NALU);
+			auto media_packet = std::make_shared<MediaPacket>(GetMsid(),
+															  track->GetMediaType(),
+															  track->GetId(),
+															  _h264_extradata_nalu,
+															  adjusted_timestamp,
+															  adjusted_timestamp,
+															  cmn::BitstreamFormat::H264_ANNEXB,
+															  cmn::PacketType::NALU);
 			SendFrame(media_packet);
 			_sent_sequence_header = true;
 		}

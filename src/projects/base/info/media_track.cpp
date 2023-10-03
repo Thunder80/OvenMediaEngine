@@ -228,6 +228,7 @@ ov::String MediaTrack::GetCodecsParameter() const
 		}
 		
 		case cmn::MediaCodecId::Opus:
+		case cmn::MediaCodecId::Multiopus: 
 		{
 			// https://developer.mozilla.org/en-US/docs/Web/Media/Formats/codecs_parameter
 			// In an MP4 container, the codecs parameter for Opus is "mp4a.ad"
@@ -408,6 +409,7 @@ bool MediaTrack::IsValid()
 			}
 		}
 		break;
+		case MediaCodecId::Multiopus:
 		case MediaCodecId::Opus: {
 			if (_time_base.GetNum() > 0 &&
 				_time_base.GetDen() > 0 &&
@@ -550,7 +552,6 @@ int32_t MediaTrack::GetBitrate() const
 void MediaTrack::SetBitrateByMeasured(int32_t bitrate)
 {
 	_bitrate = bitrate;
-
 }
 
 int32_t MediaTrack::GetBitrateByMeasured() const

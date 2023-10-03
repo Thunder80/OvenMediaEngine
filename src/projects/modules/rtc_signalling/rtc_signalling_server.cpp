@@ -736,6 +736,8 @@ std::shared_ptr<const ov::Error> RtcSignallingServer::DispatchRequestOffer(const
 
 			// Generate offer_sdp string from SessionDescription
 			ov::String offer_sdp = sdp->ToString();
+			// offer_sdp = offer_sdp.Replace("OPUS/48000/2", "multiopus/48000/6");
+			// offer_sdp = offer_sdp.Replace("useinbandfec=1", "channel_mapping=0,4,1,2,3,5; num_streams=4; coupled_streams=2;maxaveragebitrate=510000;minptime=10;useinbandfec=1");
 			if (offer_sdp.IsEmpty() == false)
 			{
 				value["command"] = "offer";

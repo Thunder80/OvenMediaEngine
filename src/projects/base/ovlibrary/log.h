@@ -83,6 +83,7 @@ typedef enum StatLogType
 #define logw(tag, format, ...)                        ov_log_internal(OVLogLevelWarning,        tag, __FILE__, __LINE__, __PRETTY_FUNCTION__, format, ## __VA_ARGS__)
 #define loge(tag, format, ...)                        ov_log_internal(OVLogLevelError,          tag, __FILE__, __LINE__, __PRETTY_FUNCTION__, format, ## __VA_ARGS__)
 #define logc(tag, format, ...)                        ov_log_internal(OVLogLevelCritical,       tag, __FILE__, __LINE__, __PRETTY_FUNCTION__, format, ## __VA_ARGS__)
+#define loglog(tag, format, ...)                        ov_log_internal(OVLogLevelCritical,       tag, __FILE__, __LINE__, __PRETTY_FUNCTION__, format, ## __VA_ARGS__)
 
 //--------------------------------------------------------------------
 // Logging APIs with tag
@@ -96,6 +97,7 @@ typedef enum StatLogType
 #define logtw(format, ...)                            logw(OV_LOG_TAG, format, ## __VA_ARGS__)
 #define logte(format, ...)                            loge(OV_LOG_TAG, format, ## __VA_ARGS__)
 #define logtc(format, ...)                            logc(OV_LOG_TAG, format, ## __VA_ARGS__)
+#define logtlo(format, ...)                            logc(OV_LOG_TAG, format, ## __VA_ARGS__)
 
 #define stat_log(type, format, ...)                         ov_stat_log_internal(type, OVLogLevelInformation,    "STAT", __FILE__, __LINE__, __PRETTY_FUNCTION__, format, ## __VA_ARGS__)
 
@@ -129,7 +131,6 @@ void ov_log_set_path(const char *log_path);
 void ov_stat_log_internal(StatLogType type, OVLogLevel level, const char *tag, const char *file, int line, const char *method, const char *format, ...);
 void ov_stat_log_set_path(StatLogType type, const char *log_path);
 
-
 #ifdef __cplusplus
 }
-#endif // __cplusplus
+#endif	// __cplusplus

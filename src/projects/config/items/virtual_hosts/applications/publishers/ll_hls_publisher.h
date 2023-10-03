@@ -12,7 +12,6 @@
 #include "dumps/dumps.h"
 #include "ll_hls_cache_control.h"
 #include "ll_hls_dvr.h"
-#include "ll_hls_drm.h"
 #include "publisher.h"
 
 namespace cfg
@@ -35,7 +34,6 @@ namespace cfg
 					Dumps _dumps;
 					LLHlsCacheControl _cache_control;
 					LLHlsDvr _dvr;
-					LLHlsDrm _drm;
 					bool _server_time_based_segment_numbering = false;
 
 				public:
@@ -53,7 +51,6 @@ namespace cfg
 					CFG_DECLARE_CONST_REF_GETTER_OF(GetDumps, _dumps)
 					CFG_DECLARE_CONST_REF_GETTER_OF(GetCacheControl, _cache_control)
 					CFG_DECLARE_CONST_REF_GETTER_OF(GetDvr, _dvr)
-					CFG_DECLARE_CONST_REF_GETTER_OF(GetDrm, _drm)
 
 				protected:
 					void MakeList() override
@@ -70,7 +67,6 @@ namespace cfg
 						Register<Optional>("Dumps", &_dumps);
 						Register<Optional>("CacheControl", &_cache_control);
 						Register<Optional>("DVR", &_dvr);
-						Register<Optional>("DRM", &_drm);
 					}
 				};
 			}  // namespace pub

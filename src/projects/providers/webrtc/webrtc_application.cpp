@@ -7,7 +7,6 @@
 //
 //==============================================================================
 
-#include "webrtc_private.h"
 #include "webrtc_application.h"
 
 #include <modules/rtp_rtcp/rtp_header_extension/rtp_header_extension_transport_cc.h>
@@ -247,9 +246,10 @@ namespace pvd
 			// payloads
 			for (auto &offer_payload : offer_media_desc->GetPayloadList())
 			{
-				if (offer_payload->GetCodec() != PayloadAttr::SupportCodec::H264 && 
-					offer_payload->GetCodec() != PayloadAttr::SupportCodec::VP8 && 
-					offer_payload->GetCodec() != PayloadAttr::SupportCodec::OPUS)
+				if(offer_payload->GetCodec() != PayloadAttr::SupportCodec::H264 &&
+					offer_payload->GetCodec() != PayloadAttr::SupportCodec::VP8 &&
+					offer_payload->GetCodec() != PayloadAttr::SupportCodec::OPUS &&
+					offer_payload->GetCodec() != PayloadAttr::SupportCodec::MULTIOPUS)
 				{
 					logti("unsupported codec(%s) has ignored", offer_payload->GetCodecStr().CStr());
 					continue;
@@ -285,11 +285,11 @@ namespace pvd
 			answer_media_desc->Update();
 			answer_sdp->AddMedia(answer_media_desc);
 		}
-		
+
 		answer_sdp->Update();
 
 		logti("Answer SDP created : %s", answer_sdp->ToString().CStr());
 
 		return answer_sdp;
 	}
-}
+}  // namespace pvd

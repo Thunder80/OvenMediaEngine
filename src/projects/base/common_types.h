@@ -269,6 +269,7 @@ union CodecSpecificInfoUnion
 	// In the future
 	// RTPVideoHeaderVP9 vp9;
 	CodecSpecificInfoOpus opus;
+	CodecSpecificInfoOpus multiopus;
 };
 
 struct CodecSpecificInfo
@@ -401,6 +402,8 @@ static ov::String StringFromMediaCodecId(const cmn::MediaCodecId &type)
 			return "MP3";
 		case cmn::MediaCodecId::Opus:
 			return "OPUS";
+		case cmn::MediaCodecId::Multiopus:
+			return "MULTIOPUS";
 		case cmn::MediaCodecId::Jpeg:
 			return "JPEG";
 		case cmn::MediaCodecId::Png:

@@ -529,6 +529,14 @@ namespace pvd
 					depacketizer_type = RtpDepacketizingManager::SupportedDepacketizerType::MPEG4_GENERIC_AUDIO;
 					break;
 
+				case PayloadAttr::SupportCodec::MULTIOPUS:
+					track->SetMediaType(cmn::MediaType::Audio);
+					track->SetCodecId(cmn::MediaCodecId::Multiopus);
+					track->SetOriginBitstream(cmn::BitstreamFormat::OPUS);
+					track->GetChannel().SetCount(std::atoi(first_payload->GetCodecParams()));
+					depacketizer_type = RtpDepacketizingManager::SupportedDepacketizerType::OPUS;
+					break;
+
 				case PayloadAttr::SupportCodec::OPUS:
 					track->SetMediaType(cmn::MediaType::Audio);
 					track->SetCodecId(cmn::MediaCodecId::Opus);
@@ -1019,6 +1027,11 @@ namespace pvd
 				packet_type = cmn::PacketType::RAW;
 				break;
 
+			case cmn::MediaCodecId::Multiopus:
+				bitstream_format = cmn::BitstreamFormat::OPUS;
+				packet_type = cmn::PacketType::RAW;
+				break;
+
 			// Our AAC depacketizer always converts packet to ADTS
 			case cmn::MediaCodecId::Aac:
 				bitstream_format = cmn::BitstreamFormat::AAC_ADTS;
@@ -1043,7 +1056,6 @@ namespace pvd
 			MonitorInstance->IncreaseBytesIn(*Stream::GetSharedPtr(), bitstream->GetLength());
 			return;
 		}
-		
 
 		logtd("Channel(%d) Payload Type(%d) Ssrc(%u) Timestamp(%u) PTS(%lld) Time scale(%f) Adjust Timestamp(%f)",
 			  channel, first_rtp_packet->PayloadType(), first_rtp_packet->Ssrc(), first_rtp_packet->Timestamp(), adjusted_timestamp, track->GetTimeBase().GetExpr(), static_cast<double>(adjusted_timestamp) * track->GetTimeBase().GetExpr());

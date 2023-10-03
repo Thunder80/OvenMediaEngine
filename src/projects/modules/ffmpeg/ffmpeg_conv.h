@@ -16,13 +16,6 @@
 extern "C"
 {
 #include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libavutil/opt.h>
-#include <libavutil/pixdesc.h>
-#include <libswscale/swscale.h>
-#include <libavutil/samplefmt.h>
-#include <libavutil/channel_layout.h>
-#include <libavutil/cpu.h>
 #include <libavfilter/buffersink.h>
 #include <libavfilter/buffersrc.h>
 #include <libavformat/avio.h>
@@ -90,7 +83,7 @@ namespace ffmpeg
 				case AV_CODEC_ID_MP3:
 					return cmn::MediaCodecId::Mp3;
 				case AV_CODEC_ID_OPUS:
-					return cmn::MediaCodecId::Opus;
+					return cmn::MediaCodecId::Multiopus;
 				case AV_CODEC_ID_MJPEG:
 					return cmn::MediaCodecId::Jpeg;
 				case AV_CODEC_ID_PNG:
@@ -121,6 +114,8 @@ namespace ffmpeg
 				case cmn::MediaCodecId::Mp3:
 					return AV_CODEC_ID_MP3;
 				case cmn::MediaCodecId::Opus:
+					return AV_CODEC_ID_OPUS;
+				case cmn::MediaCodecId::Multiopus:
 					return AV_CODEC_ID_OPUS;
 				case cmn::MediaCodecId::Jpeg:
 					return AV_CODEC_ID_MJPEG;
@@ -740,7 +735,8 @@ namespace ffmpeg
 					codec_id == cmn::MediaCodecId::Vp9 ||
 					codec_id == cmn::MediaCodecId::Aac ||
 					codec_id == cmn::MediaCodecId::Mp3 ||
-					codec_id == cmn::MediaCodecId::Opus)
+					codec_id == cmn::MediaCodecId::Opus ||
+					codec_id == cmn::MediaCodecId::Multiopus)
 				{
 					return true;
 				}
@@ -750,7 +746,8 @@ namespace ffmpeg
 				if (
 					codec_id == cmn::MediaCodecId::Vp8 ||
 					codec_id == cmn::MediaCodecId::Vp9 ||
-					codec_id == cmn::MediaCodecId::Opus)
+					codec_id == cmn::MediaCodecId::Opus ||
+					codec_id == cmn::MediaCodecId::Multiopus)
 				{
 					return true;
 				}

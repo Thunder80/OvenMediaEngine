@@ -149,6 +149,7 @@ static AVCodecID AvCodecIdFromMediaCodecId(cmn::MediaCodecId codec_id)
 		WRITER_CASE(cmn::MediaCodecId::Aac, AV_CODEC_ID_AAC)
 		WRITER_CASE(cmn::MediaCodecId::Mp3, AV_CODEC_ID_MP3)
 		WRITER_CASE(cmn::MediaCodecId::Opus, AV_CODEC_ID_OPUS)
+		WRITER_CASE(cmn::MediaCodecId::Multiopus, AV_CODEC_ID_OPUS)
 		WRITER_CASE(cmn::MediaCodecId::Jpeg, AV_CODEC_ID_JPEG2000)
 		WRITER_CASE(cmn::MediaCodecId::Png, AV_CODEC_ID_PNG)
 	}

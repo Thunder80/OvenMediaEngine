@@ -26,6 +26,7 @@ public:
 		H265,
 		MPEG4_GENERIC,
 		OPUS,
+		MULTIOPUS,
 		RED,
 		RTX
 	};

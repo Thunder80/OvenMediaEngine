@@ -7,7 +7,6 @@
 //
 //==============================================================================
 
-#include <base/ovcrypto/base_64.h>
 #include "payload_attr.h"
 
 PayloadAttr::PayloadAttr()
@@ -60,6 +59,10 @@ void PayloadAttr::SetRtpmap(const uint8_t payload_type, const ov::String &codec,
 	else if(codec.LowerCaseString() == "opus")
 	{
 		_codec = SupportCodec::OPUS;
+	}
+	else if(codec.LowerCaseString() == "multiopus")
+	{
+		_codec = SupportCodec::MULTIOPUS;
 	}
 	else if(codec.LowerCaseString() == "mpeg4-generic")
 	{

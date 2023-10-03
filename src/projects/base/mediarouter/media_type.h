@@ -88,6 +88,7 @@ namespace cmn
 		Aac,
 		Mp3,
 		Opus,
+		Multiopus,
 		Jpeg,
 		Png,
 	};
@@ -121,9 +122,10 @@ namespace cmn
 		return false;
 	}
 
-	static bool IsImageCodec(cmn::MediaCodecId codec_id) {
-		if (codec_id == cmn::MediaCodecId::Jpeg || 
-		    codec_id == cmn::MediaCodecId::Png)
+	static bool IsImageCodec(cmn::MediaCodecId codec_id)
+	{
+		if (codec_id == cmn::MediaCodecId::Jpeg ||
+			codec_id == cmn::MediaCodecId::Png)
 		{
 			return true;
 		}
@@ -135,7 +137,8 @@ namespace cmn
 	{
 		if (codec_id == cmn::MediaCodecId::Aac ||
 			codec_id == cmn::MediaCodecId::Mp3 ||
-			codec_id == cmn::MediaCodecId::Opus)
+			codec_id == cmn::MediaCodecId::Opus ||
+			codec_id == cmn::MediaCodecId::Multiopus)
 		{
 			return true;
 		}
@@ -304,6 +307,8 @@ namespace cmn
 				return "AAC";
 			case cmn::MediaCodecId::Opus:
 				return "OPUS";
+			case cmn::MediaCodecId::Multiopus:
+				return "MULTIOPUS";
 			case cmn::MediaCodecId::Jpeg:
 				return "JPEG";
 			case cmn::MediaCodecId::Png:
@@ -369,6 +374,10 @@ namespace cmn
 		else if (name == "OPUS")
 		{
 			return cmn::MediaCodecId::Opus;
+		}
+		else if (name == "MULTIOPUS")
+		{
+			return cmn::MediaCodecId::Multiopus;
 		}
 
 		return cmn::MediaCodecId::None;

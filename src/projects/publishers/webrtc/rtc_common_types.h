@@ -24,6 +24,7 @@ enum class FixedRtcPayloadType : uint8_t
 	H265_PAYLOAD_TYPE = 100,
 	H265_RTX_PAYLOAD_TYPE = 101,
 	OPUS_PAYLOAD_TYPE = 110,
+	MULTIOPUS_PAYLOAD_TYPE = 111,
 	RED_PAYLOAD_TYPE = 120,
 	RED_RTX_PAYLOAD_TYPE = 121,
 	ULPFEC_PAYLOAD_TYPE	= 122
@@ -47,6 +48,8 @@ static cmn::MediaCodecId CodecIdFromPayloadType(FixedRtcPayloadType payload_type
 			return cmn::MediaCodecId::H265;
 		case FixedRtcPayloadType::OPUS_PAYLOAD_TYPE:	
 			return cmn::MediaCodecId::Opus;
+		case FixedRtcPayloadType::MULTIOPUS_PAYLOAD_TYPE:
+			return cmn::MediaCodecId::Multiopus;
 		default:
 			return cmn::MediaCodecId::None;
 	}
@@ -71,11 +74,14 @@ static uint8_t PayloadTypeFromCodecId(cmn::MediaCodecId codec_id)
 		case cmn::MediaCodecId::H264:
 			payload_type = static_cast<uint8_t>(FixedRtcPayloadType::H264_PAYLOAD_TYPE);
 			break;
-		case cmn::MediaCodecId::H265: 
+		case cmn::MediaCodecId::H265:
 			payload_type = static_cast<uint8_t>(FixedRtcPayloadType::H265_PAYLOAD_TYPE);
 			break;
 		case cmn::MediaCodecId::Opus:
 			payload_type = static_cast<uint8_t>(FixedRtcPayloadType::OPUS_PAYLOAD_TYPE);
+			break;
+		case cmn::MediaCodecId::Multiopus:
+			payload_type = static_cast<uint8_t>(FixedRtcPayloadType::MULTIOPUS_PAYLOAD_TYPE);
 			break;
 		default:
 			// No support codecs
@@ -87,7 +93,7 @@ static uint8_t PayloadTypeFromCodecId(cmn::MediaCodecId codec_id)
 
 static uint8_t RtxPayloadTypeFromCodecId(cmn::MediaCodecId codec_id)
 {
-    uint8_t payload_type = 0;
+	uint8_t payload_type = 0;
 
 	switch (codec_id)
 	{
