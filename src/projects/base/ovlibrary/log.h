@@ -97,7 +97,7 @@ typedef enum StatLogType
 #define logtw(format, ...)                            logw(OV_LOG_TAG, format, ## __VA_ARGS__)
 #define logte(format, ...)                            loge(OV_LOG_TAG, format, ## __VA_ARGS__)
 #define logtc(format, ...)                            logc(OV_LOG_TAG, format, ## __VA_ARGS__)
-#define logtlo(format, ...)                            logc(OV_LOG_TAG, format, ## __VA_ARGS__)
+#define logtlo(format, ...)                           logc(OV_LOG_TAG, format, ## __VA_ARGS__)
 
 #define stat_log(type, format, ...)                         ov_stat_log_internal(type, OVLogLevelInformation,    "STAT", __FILE__, __LINE__, __PRETTY_FUNCTION__, format, ## __VA_ARGS__)
 

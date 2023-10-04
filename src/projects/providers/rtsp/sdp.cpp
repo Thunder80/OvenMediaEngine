@@ -10,6 +10,7 @@ enum class RtpCodec
     H264,
     H265,
     Opus,
+    Multiopus,
     Mpeg4GenericAudio,
     Mpeg4GenericVideo,
     Mpeg4VideoElementaryStream,
@@ -70,6 +71,14 @@ bool ParseSdp(const std::vector<uint8_t> &sdp, RtspMediaInfo &rtsp_media_info)
                                     // For Opus stereo should be detected from the sprop-stereo field
                                     auto &audio_channel = payload.GetChannel();
                                     audio_channel.SetLayout(cmn::AudioChannel::Layout::LayoutMono);
+                                }
+                                else if (codec[0] == "multiopus")
+                                {
+                                    payload_codecs[payload_type] = RtpCodec::Multiopus;
+                                    payload.SetCodecId(cmn::MediaCodecId::Multiopus);
+                                    // For Opus stereo should be detected from the sprop-stereo field
+                                    auto &audio_channel = payload.GetChannel();
+                                    audio_channel.SetLayout(cmn::AudioChannel::Layout::Layout5Point1);
                                 }
                                 else if (CaseInsensitiveEqual(codec[0],"MPEG4-GENERIC"_str_v)) // The 
                                 {

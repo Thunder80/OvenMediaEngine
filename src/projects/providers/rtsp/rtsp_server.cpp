@@ -80,6 +80,7 @@ std::unique_ptr<T> CreateTrack(const RtspServer::StreamTrackInfo *stream_track, 
                 rtp_track.reset(static_cast<T*>(rtp_h264_track.release()));
             }
             break;
+        case cmn::MediaCodecId::Multiopus:
         case cmn::MediaCodecId::Opus:
             {
                 using TrackType = RtpOpusTrack<T>;

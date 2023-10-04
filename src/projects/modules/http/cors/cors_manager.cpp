@@ -224,6 +224,7 @@ namespace http
 			response->SetHeader("Access-Control-Allow-Methods", ov::String::Join(method_list, ", "));
 		}
 		response->SetHeader("Access-Control-Allow-Headers", "*");
+		response->SetHeader("Access-Control-Expose-Headers", "*");
 
 		return true;
 	}

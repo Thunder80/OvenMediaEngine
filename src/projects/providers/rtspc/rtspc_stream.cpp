@@ -532,7 +532,7 @@ namespace pvd
 				case PayloadAttr::SupportCodec::MULTIOPUS:
 					track->SetMediaType(cmn::MediaType::Audio);
 					track->SetCodecId(cmn::MediaCodecId::Multiopus);
-					track->SetOriginBitstream(cmn::BitstreamFormat::OPUS);
+					track->SetOriginBitstream(cmn::BitstreamFormat::OPUS_RTP_RFC_7587);
 					track->GetChannel().SetCount(std::atoi(first_payload->GetCodecParams()));
 					depacketizer_type = RtpDepacketizingManager::SupportedDepacketizerType::OPUS;
 					break;

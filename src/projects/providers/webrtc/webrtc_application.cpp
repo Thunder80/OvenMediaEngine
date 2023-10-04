@@ -7,6 +7,7 @@
 //
 //==============================================================================
 
+#include "webrtc_private.h"
 #include "webrtc_application.h"
 
 #include <modules/rtp_rtcp/rtp_header_extension/rtp_header_extension_transport_cc.h>
@@ -144,6 +145,8 @@ namespace pvd
 		payload = std::make_shared<PayloadAttr>();
 		payload->SetFmtp("sprop-stereo=1;stereo=1;minptime=10;useinbandfec=1");
 		payload->SetRtpmap(payload_type_num++, "OPUS", 48000, "2");
+		// payload->SetFmtp("channel_mapping=0,4,1,2,3,5; num_streams=4; coupled_streams=2;maxaveragebitrate=510000;minptime=10;useinbandfec=1");
+		// payload->SetRtpmap(payload_type_num++, "MULTIOPUS", 48000, "6");
 		
 		if (transport_cc_enabled)
 		{

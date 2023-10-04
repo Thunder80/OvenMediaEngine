@@ -131,7 +131,7 @@ namespace pvd
 				{
 					logtlo("Webrtc stream codec");
 					audio_track->SetCodecId(cmn::MediaCodecId::Multiopus);
-					audio_track->SetOriginBitstream(cmn::BitstreamFormat::OPUS);
+					audio_track->SetOriginBitstream(cmn::BitstreamFormat::OPUS_RTP_RFC_7587);
 					depacketizer_type = RtpDepacketizingManager::SupportedDepacketizerType::OPUS;
 				}
 				else if (codec == PayloadAttr::SupportCodec::MPEG4_GENERIC)

@@ -37,6 +37,9 @@ bool RtpPacketizer::SetCodec(cmn::MediaCodecId codec_type)
 		case cmn::MediaCodecId::H265:
 			SetVideoCodec(cmn::MediaCodecId::H265);
 			break;
+		case cmn::MediaCodecId::Multiopus:
+			SetAudioCodec(cmn::MediaCodecId::Multiopus);
+			break;
 		case cmn::MediaCodecId::Opus:
 			SetAudioCodec(cmn::MediaCodecId::Opus);
 			break;

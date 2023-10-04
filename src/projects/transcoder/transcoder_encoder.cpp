@@ -191,6 +191,7 @@ std::shared_ptr<TranscodeEncoder> TranscodeEncoder::Create(int32_t encoder_id, c
 			}
 
 			break;
+		case cmn::MediaCodecId::Multiopus:
 		case cmn::MediaCodecId::Opus:
 #if USE_LEGACY_LIBOPUS
 			encoder = std::make_shared<EncoderOPUS>(info);

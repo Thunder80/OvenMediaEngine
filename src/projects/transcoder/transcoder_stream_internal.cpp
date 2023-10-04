@@ -95,6 +95,7 @@ cmn::Timebase TranscoderStreamInternal::GetDefaultTimebaseByCodecId(cmn::MediaCo
 			break;
 		case cmn::MediaCodecId::Aac:
 		case cmn::MediaCodecId::Mp3:
+		case cmn::MediaCodecId::Multiopus:
 		case cmn::MediaCodecId::Opus:
 			timebase.SetNum(1);
 			timebase.SetDen(48000);
@@ -254,7 +255,7 @@ std::shared_ptr<MediaTrack> TranscoderStreamInternal::CreateOutputTrack(const st
 		output_track->SetSampleRate(profile.GetSamplerate());
 
 		// Samplerate
-		if (output_track->GetCodecId() == cmn::MediaCodecId::Opus)
+		if (output_track->GetCodecId() == cmn::MediaCodecId::Opus || output_track->GetCodecId() == cmn::MediaCodecId::Multiopus)
 		{
 			if (output_track->GetSampleRate() != 48000)
 			{

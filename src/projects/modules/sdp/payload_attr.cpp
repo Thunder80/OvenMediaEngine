@@ -7,6 +7,7 @@
 //
 //==============================================================================
 
+#include <base/ovcrypto/base_64.h>
 #include "payload_attr.h"
 
 PayloadAttr::PayloadAttr()

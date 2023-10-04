@@ -9,18 +9,16 @@
 #include "rtc_stream.h"
 
 #include <base/info/media_extradata.h>
+#include <modules/bitstream/h264/h264_decoder_configuration_record.h>
 #include <modules/bitstream/nalu/nal_stream_converter.h>
+#include <modules/rtp_rtcp/rtp_header_extension/rtp_header_extension_abs_send_time.h>
 #include <modules/rtp_rtcp/rtp_header_extension/rtp_header_extension_framemarking.h>
 #include <modules/rtp_rtcp/rtp_header_extension/rtp_header_extension_playout_delay.h>
-#include <modules/rtp_rtcp/rtp_header_extension/rtp_header_extension_abs_send_time.h>
-
-#include <modules/bitstream/h264/h264_decoder_configuration_record.h>
 
 #include "rtc_application.h"
+#include "rtc_common_types.h"
 #include "rtc_private.h"
 #include "rtc_session.h"
-
-#include "rtc_common_types.h"
 
 using namespace cmn;
 
@@ -197,20 +195,20 @@ bool RtcStream::Start()
 	std::lock_guard<std::shared_mutex> lock(_rtc_master_playlist_map_lock);
 	_rtc_master_playlist_map[_default_playlist_name] = rtc_master_playlist;
 
-	logti("WebRTC Stream has been created : %s/%u\nRtx(%s) Ulpfec(%s) JitterBuffer(%s) PlayoutDelay(%s min:%d max: %d)", 
-									GetName().CStr(), GetId(),
-									ov::Converter::ToString(_rtx_enabled).CStr(),
-									ov::Converter::ToString(_ulpfec_enabled).CStr(),
-									ov::Converter::ToString(_jitter_buffer_enabled).CStr(),
-									ov::Converter::ToString(_playout_delay_enabled).CStr(),
-									_playout_delay_min, _playout_delay_max);
-	
+	logti("WebRTC Stream has been created : %s/%u\nRtx(%s) Ulpfec(%s) JitterBuffer(%s) PlayoutDelay(%s min:%d max: %d)",
+		  GetName().CStr(), GetId(),
+		  ov::Converter::ToString(_rtx_enabled).CStr(),
+		  ov::Converter::ToString(_ulpfec_enabled).CStr(),
+		  ov::Converter::ToString(_jitter_buffer_enabled).CStr(),
+		  ov::Converter::ToString(_playout_delay_enabled).CStr(),
+		  _playout_delay_min, _playout_delay_max);
+
 	return Stream::Start();
 }
 
 bool RtcStream::Stop()
 {
-	if(GetState() != State::STARTED)
+	if (GetState() != State::STARTED)
 	{
 		return false;
 	}
@@ -239,6 +237,7 @@ bool RtcStream::IsSupportedCodec(cmn::MediaCodecId codec_id)
 	//case cmn::MediaCodecId::H265:
 	case cmn::MediaCodecId::Vp8:
 	case cmn::MediaCodecId::Opus:
+	case cmn::MediaCodecId::Multiopus:
 		return true;
 	default:
 		return false;
@@ -262,6 +261,7 @@ std::shared_ptr<const RtcMasterPlaylist> RtcStream::GetRtcMasterPlaylist(const o
 {
 	if (file_name.IsEmpty())
 	{
+		logtw("Called Default playlist name %s", _default_playlist_name);
 		return GetRtcMasterPlaylist(_default_playlist_name);
 	}
 
@@ -446,6 +446,7 @@ std::shared_ptr<SessionDescription> RtcStream::CreateSessionDescription(const ov
 
 	offer_sdp->Update();
 
+	logte("OFFER SDP IN RTC STREAM %s", offer_sdp->ToString().CStr());
 	return offer_sdp;
 }
 
@@ -528,6 +529,7 @@ std::shared_ptr<MediaDescription> RtcStream::MakeAudioDescription() const
 		audio_media_desc->AddExtmap(RTP_HEADER_EXTENSION_ABS_SEND_TIME_ID, RTP_HEADER_EXTENSION_ABS_SEND_TIME_ATTRIBUTE);
 	}
 	
+	logtw("AUDIO DESCRIPTION %s", audio_media_desc->ToString().CStr());
 	return audio_media_desc;
 }
 
@@ -570,6 +572,7 @@ std::shared_ptr<PayloadAttr> RtcStream::MakePayloadAttr(const std::shared_ptr<co
 
 			break;
 		case MediaCodecId::Opus:
+			logtw("CALLED OPUS");
 			payload->SetRtpmap(PayloadTypeFromCodecId(track->GetCodecId()), "OPUS", static_cast<uint32_t>(track->GetSample().GetRateNum()), "2");
 
 			// Enable inband-fec
@@ -581,6 +584,21 @@ std::shared_ptr<PayloadAttr> RtcStream::MakePayloadAttr(const std::shared_ptr<co
 			else
 			{
 				payload->SetFmtp("sprop-stereo=0;stereo=0;minptime=10;useinbandfec=1");
+			}
+			break;
+		case MediaCodecId::Multiopus:
+			logtw("CALLED MULTIOPUS");
+			payload->SetRtpmap(PayloadTypeFromCodecId(track->GetCodecId()), "MULTIOPUS", static_cast<uint32_t>(track->GetSample().GetRateNum()), "6");
+
+			// Enable inband-fec
+			// a=fmtp:111 maxplaybackrate=16000; useinbandfec=1; maxaveragebitrate=20000
+			if (track->GetChannel().GetLayout() == cmn::AudioChannel::Layout::LayoutStereo)
+			{
+				payload->SetFmtp("channel_mapping=0,4,1,2,3,5; num_streams=4; coupled_streams=2;maxaveragebitrate=510000;minptime=10;useinbandfec=1");
+			}
+			else
+			{
+				payload->SetFmtp("channel_mapping=0,4,1,2,3,5; num_streams=4; coupled_streams=2;maxaveragebitrate=510000;minptime=10;useinbandfec=1");
 			}
 			break;
 		default:
@@ -832,7 +850,7 @@ void RtcStream::AddPacketizer(const std::shared_ptr<const MediaTrack> &track)
 	}
 
 	logtd("Add Packetizer : codec(%u) id(%u) pt(%d) ssrc(%u)", track->GetCodecId(), track->GetId(), payload_type, ssrc);
-	
+
 	auto packetizer = std::make_shared<RtpPacketizer>(RtpPacketizerInterface::GetSharedPtr());
 	packetizer->SetCodec(track->GetCodecId());
 	packetizer->SetPayloadType(payload_type);

@@ -16,6 +16,13 @@
 extern "C"
 {
 #include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavutil/opt.h>
+#include <libavutil/pixdesc.h>
+#include <libswscale/swscale.h>
+#include <libavutil/samplefmt.h>
+#include <libavutil/channel_layout.h>
+#include <libavutil/cpu.h>
 #include <libavfilter/buffersink.h>
 #include <libavfilter/buffersrc.h>
 #include <libavformat/avio.h>
